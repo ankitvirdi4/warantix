@@ -12,3 +12,4 @@ qdrant-client
 scikit-learn
 numpy
 pydantic-settings
+python-multipart
