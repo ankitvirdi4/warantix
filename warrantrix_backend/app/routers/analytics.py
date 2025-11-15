@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..services.analytics_service_stub import get_cost_by_component, get_top_failure_clusters
+from ..services.analytics_service import get_cost_by_component, get_top_failure_clusters
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 

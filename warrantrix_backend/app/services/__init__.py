@@ -1,5 +1,8 @@
 __all__ = [
     "ingest_service",
-    "clustering_service_stub",
-    "analytics_service_stub",
+    "embedding_service",
+    "vector_store",
+    "clustering_service",
+    "analytics_service",
+    "ai_reasoning_service",
 ]

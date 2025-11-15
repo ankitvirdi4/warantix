@@ -31,6 +31,7 @@ class ClaimCreate(ClaimBase):
 
 class ClaimRead(ClaimBase):
     id: int
+    embedded_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 

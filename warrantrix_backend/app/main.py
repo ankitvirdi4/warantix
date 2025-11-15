@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from .config import settings
 from .core.logging import setup_logging
-from .routers import analytics, auth, claims, clusters, ingest
+from .routers import admin, analytics, auth, claims, clusters, ingest
 
 setup_logging()
 
@@ -16,6 +16,7 @@ app.include_router(ingest.router, prefix=API_PREFIX)
 app.include_router(claims.router, prefix=API_PREFIX)
 app.include_router(clusters.router, prefix=API_PREFIX)
 app.include_router(analytics.router, prefix=API_PREFIX)
+app.include_router(admin.router, prefix=API_PREFIX)
 
 
 @app.get("/health")
