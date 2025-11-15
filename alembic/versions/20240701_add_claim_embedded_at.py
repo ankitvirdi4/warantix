@@ -1,7 +1,7 @@
 """Add embedded_at column to claims
 
 Revision ID: 20240701_add_claim_embedded_at
-Revises: 
+Revises: 20240709_create_core_tables
 Create Date: 2024-07-01 00:00:00.000000
 """
 
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "20240701_add_claim_embedded_at"
-down_revision = None
+down_revision = "20240709_create_core_tables"
 branch_labels = None
 depends_on = None
 
