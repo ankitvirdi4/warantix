@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from .core.security import PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH
+
 
 class ORMModelMixin:
     """Shared configuration for Pydantic models backed by ORM objects."""
@@ -71,7 +73,9 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(
+        ..., min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH
+    )
 
 
 class UserRead(ORMModelMixin, UserBase):
