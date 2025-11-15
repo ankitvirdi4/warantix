@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal, Optional
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 
 class Settings(BaseSettings):
@@ -20,6 +20,19 @@ class Settings(BaseSettings):
     embedding_batch_size: int = Field(64, env="EMBEDDING_BATCH_SIZE")
     clustering_min_claims: int = Field(50, env="CLUSTERING_MIN_CLAIMS")
     num_clusters_default: int = Field(10, env="NUM_CLUSTERS_DEFAULT")
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:5173",
+            "https://YOUR_FRONTEND_NAME.vercel.app",
+        ],
+        env="CORS_ORIGINS",
+    )
+
+    @validator("cors_origins", pre=True)
+    def split_cors_origins(cls, value: Optional[str]):
+        if isinstance(value, str):
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
 
     class Config:
         env_file = ".env"
