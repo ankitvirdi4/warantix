@@ -11,3 +11,4 @@ openai
 qdrant-client
 scikit-learn
 numpy
+pydantic-settings
