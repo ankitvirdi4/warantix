@@ -33,9 +33,27 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
 
     @field_validator("cors_origins", mode="before")
-    def split_cors_origins(cls, value: Optional[str]):
+    def parse_cors_origins(cls, value: Optional[str]):
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            stripped = value.strip()
+            if not stripped:
+                return []
+
+            try:
+                import json
+
+                loaded = json.loads(stripped)
+            except json.JSONDecodeError:
+                return [origin.strip() for origin in stripped.split(",") if origin.strip()]
+
+            if isinstance(loaded, str):
+                return [loaded.strip()] if loaded.strip() else []
+
+            if isinstance(loaded, list):
+                return [str(item).strip() for item in loaded if str(item).strip()]
+
+            raise ValueError("CORS_ORIGINS must be a string, list, or JSON array of strings")
+
         return value
 
 
