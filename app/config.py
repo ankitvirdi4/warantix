@@ -1,8 +1,8 @@
 from functools import lru_cache
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     embedding_batch_size: int = Field(64, env="EMBEDDING_BATCH_SIZE")
     clustering_min_claims: int = Field(50, env="CLUSTERING_MIN_CLAIMS")
     num_clusters_default: int = Field(10, env="NUM_CLUSTERS_DEFAULT")
-    cors_origins: list[str] = Field(
+    cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
             "http://localhost:5173",
             "https://YOUR_FRONTEND_NAME.vercel.app",
