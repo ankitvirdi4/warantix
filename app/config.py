@@ -1,7 +1,8 @@
 from functools import lru_cache
 from typing import Literal, Optional
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -28,15 +29,13 @@ class Settings(BaseSettings):
         env="CORS_ORIGINS",
     )
 
-    @validator("cors_origins", pre=True)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+
+    @field_validator("cors_origins", mode="before")
     def split_cors_origins(cls, value: Optional[str]):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
 
 
 @lru_cache()
