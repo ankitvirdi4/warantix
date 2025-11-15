@@ -1,8 +1,14 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+
+class ORMModelMixin:
+    """Shared configuration for Pydantic models backed by ORM objects."""
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ClaimBase(BaseModel):
@@ -29,20 +35,17 @@ class ClaimCreate(ClaimBase):
     pass
 
 
-class ClaimRead(ClaimBase):
+class ClaimRead(ORMModelMixin, ClaimBase):
     id: int
     embedded_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
-
-
 class ClaimsPage(BaseModel):
     total: int
     page: int
     page_size: int
-    items: List[ClaimRead]
+    items: list[ClaimRead]
 
 
 class ClusterBase(BaseModel):
@@ -53,7 +56,7 @@ class ClusterBase(BaseModel):
     sample_components: Optional[str] = None
 
 
-class ClusterRead(ClusterBase):
+class ClusterRead(ORMModelMixin, ClusterBase):
     id: int
     num_claims: int
     total_cost_usd: Decimal = Field(..., decimal_places=2)
@@ -61,9 +64,6 @@ class ClusterRead(ClusterBase):
     last_failure_date: Optional[date] = None
     created_at: datetime
     updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -74,14 +74,11 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserRead(UserBase):
+class UserRead(ORMModelMixin, UserBase):
     id: int
     role: str
     created_at: datetime | None = None
     last_login: Optional[datetime] = None
-
-    model_config = ConfigDict(from_attributes=True)
-
 
 class AuthResponse(BaseModel):
     access_token: str
