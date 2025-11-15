@@ -1,10 +1,16 @@
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from ..core.security import create_access_token, get_password_hash, verify_password
+from ..core.security import (
+    PASSWORD_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    create_access_token,
+    get_password_hash,
+    verify_password,
+)
 from ..deps import get_current_user, get_db
 from ..models import User
 from ..schemas import AuthResponse, UserCreate, UserRead
@@ -12,16 +18,31 @@ from ..schemas import AuthResponse, UserCreate, UserRead
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+PASSWORD_LENGTH_MESSAGE = (
+    f"Password must be between {PASSWORD_MIN_LENGTH} and {PASSWORD_MAX_LENGTH} characters."
+)
+
+
 class LoginRequest(BaseModel):
     email: str
-    password: str
+    password: str = Field(
+        ..., min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH
+    )
 
 
 @router.post("/login", response_model=AuthResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
     email = data.email.lower()
     user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(data.password, user.password_hash):
+    try:
+        password_valid = verify_password(data.password, user.password_hash) if user else False
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=PASSWORD_LENGTH_MESSAGE,
+        ) from exc
+
+    if not user or not password_valid:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     user.last_login = datetime.utcnow()
@@ -39,7 +60,13 @@ def signup(data: UserCreate, db: Session = Depends(get_db)) -> AuthResponse:
     if existing_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
-    password_hash = get_password_hash(data.password)
+    try:
+        password_hash = get_password_hash(data.password)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=PASSWORD_LENGTH_MESSAGE,
+        ) from exc
     user = User(
         email=email,
         name=data.name or "",

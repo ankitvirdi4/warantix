@@ -1,13 +1,15 @@
 from datetime import datetime, timedelta
+from hashlib import sha256
 from typing import Any, Dict, Optional
 
+import bcrypt
 from jose import jwt
-from passlib.context import CryptContext
 
 from ..config import settings
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+PASSWORD_MIN_LENGTH = 8
+PASSWORD_MAX_LENGTH = 128
 
 
 def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
@@ -18,9 +20,17 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     return encoded_jwt
 
 
+def _prepare_password(password: str) -> str:
+    """Pre-hash the password to avoid bcrypt's 72-byte limit."""
+
+    return sha256(password.encode("utf-8")).hexdigest()
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    prepared = _prepare_password(plain_password).encode("utf-8")
+    return bcrypt.checkpw(prepared, hashed_password.encode("utf-8"))
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    prepared = _prepare_password(password).encode("utf-8")
+    return bcrypt.hashpw(prepared, bcrypt.gensalt()).decode("utf-8")
