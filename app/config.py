@@ -25,6 +25,7 @@ class Settings(BaseSettings):
         default_factory=lambda: [
             "http://localhost:5173",
             "https://YOUR_FRONTEND_NAME.vercel.app",
+            "https://warantix-app.vercel.app",
         ],
         env="CORS_ORIGINS",
     )
