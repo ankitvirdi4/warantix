@@ -1,17 +1,51 @@
 from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
+from .config import settings
 from .database import get_db as _get_db
-from .schemas import UserRead
+from .models import User
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 def get_db() -> Session:
     yield from _get_db()
 
 
-def get_current_user(db: Session = Depends(get_db)) -> UserRead:
-    # Placeholder implementation. Replace with JWT verification logic later.
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Authentication not implemented yet."
+def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+) -> User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
+
+    try:
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret_key,
+            algorithms=[settings.jwt_algorithm],
+        )
+    except JWTError as exc:
+        raise credentials_exception from exc
+
+    user_id = payload.get("user_id")
+    email = payload.get("sub")
+    if user_id is None and email is None:
+        raise credentials_exception
+
+    query = db.query(User)
+    user: User | None = None
+    if user_id is not None:
+        user = query.filter(User.id == user_id).first()
+    if user is None and email is not None:
+        user = query.filter(User.email == email).first()
+
+    if user is None:
+        raise credentials_exception
+
+    return user

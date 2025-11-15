@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class ClaimBase(BaseModel):
@@ -68,9 +68,8 @@ class ClusterRead(ClusterBase):
 
 
 class UserBase(BaseModel):
-    email: str
-    name: str
-    role: str
+    email: EmailStr
+    name: str | None = None
 
 
 class UserCreate(UserBase):
@@ -79,11 +78,18 @@ class UserCreate(UserBase):
 
 class UserRead(UserBase):
     id: int
-    created_at: datetime
+    role: str
+    created_at: datetime | None = None
     last_login: Optional[datetime] = None
 
     class Config:
         orm_mode = True
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserRead
 
 
 class JobStatus(BaseModel):
