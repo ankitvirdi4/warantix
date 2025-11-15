@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -9,12 +11,11 @@ def get_top_failure_clusters(db: Session, limit: int = 5):
         select(
             Cluster.id.label("cluster_id"),
             Cluster.label,
-            func.count(Claim.id).label("num_claims"),
-            func.coalesce(func.sum(Claim.claim_cost_usd), 0).label("total_cost_usd"),
+            Cluster.num_claims,
+            Cluster.total_cost_usd,
         )
-        .join(Claim, Claim.cluster_id == Cluster.id, isouter=True)
-        .group_by(Cluster.id)
-        .order_by(func.count(Claim.id).desc())
+        .where(Cluster.num_claims > 0)
+        .order_by(Cluster.num_claims.desc(), Cluster.total_cost_usd.desc())
         .limit(limit)
     )
     return db.execute(stmt).mappings().all()

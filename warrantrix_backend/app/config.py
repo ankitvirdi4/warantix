@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseSettings, Field
 
@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     )
     jwt_secret_key: str = Field("supersecret", env="JWT_SECRET_KEY")
     jwt_algorithm: str = Field("HS256", env="JWT_ALGORITHM")
+    openai_api_key: Optional[str] = Field(None, env="OPENAI_API_KEY")
+    openai_embedding_model: str = Field("text-embedding-3-small", env="OPENAI_EMBEDDING_MODEL")
+    openai_completion_model: str = Field("gpt-4o-mini", env="OPENAI_COMPLETION_MODEL")
+    qdrant_url: str = Field("http://qdrant:6333", env="QDRANT_URL")
+    qdrant_api_key: Optional[str] = Field(None, env="QDRANT_API_KEY")
+    embedding_batch_size: int = Field(64, env="EMBEDDING_BATCH_SIZE")
+    clustering_min_claims: int = Field(50, env="CLUSTERING_MIN_CLAIMS")
+    num_clusters_default: int = Field(10, env="NUM_CLUSTERS_DEFAULT")
 
     class Config:
         env_file = ".env"

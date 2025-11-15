@@ -7,3 +7,7 @@ python-dotenv
 passlib[bcrypt]
 python-jose[cryptography]
 pandas
+openai
+qdrant-client
+scikit-learn
+numpy
