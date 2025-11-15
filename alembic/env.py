@@ -12,12 +12,16 @@ if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
 from app.config import settings  # noqa: E402
+from app.core.logging import setup_logging  # noqa: E402
 from app.database import Base  # noqa: E402
 
 config = context.config
 
-if config.config_file_name is not None:
+loggers_section = config.get_section("loggers") if config.config_file_name else None
+if config.config_file_name is not None and loggers_section:
     fileConfig(config.config_file_name)
+else:
+    setup_logging()
 
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
