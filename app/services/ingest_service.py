@@ -51,6 +51,7 @@ def ingest_claims_from_csv(db: Session, file: UploadFile) -> IngestSummary:
         raise ValueError(f"Missing columns in CSV: {', '.join(missing_cols)}")
 
     df = df[CSV_COLUMNS]
+    df["region"] = df["region"].apply(lambda value: str(value) if pd.notna(value) else None)
     processed = len(df.index)
 
     df["failure_date"] = pd.to_datetime(df["failure_date"]).dt.date
