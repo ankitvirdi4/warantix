@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from .. import models
 from ..database import get_db
-from ..deps import get_current_user
 from ..services.ingest_service import IngestSummary, ingest_claims_from_csv
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
@@ -13,7 +11,6 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 def ingest_claims(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
 ):
     if file.content_type not in ("text/csv", "application/vnd.ms-excel", "application/octet-stream"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file type")
