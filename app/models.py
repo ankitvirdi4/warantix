@@ -34,7 +34,7 @@ class Claim(Base):
     vin: Mapped[str] = mapped_column(String(255), index=True)
     model: Mapped[str] = mapped_column(String(255))
     model_year: Mapped[int] = mapped_column(Integer)
-    region: Mapped[str] = mapped_column(String(255), index=True)
+    region: Mapped[str | None] = mapped_column(String(16), index=True, nullable=True)
     mileage_km: Mapped[int] = mapped_column(Integer)
     failure_date: Mapped[date] = mapped_column(Date)
     component: Mapped[str] = mapped_column(String(255), index=True)
