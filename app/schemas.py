@@ -18,7 +18,7 @@ class ClaimBase(BaseModel):
     vin: str
     model: str
     model_year: int
-    region: str
+    region: str | None = None
     mileage_km: int
     failure_date: date
     component: str
